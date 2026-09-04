@@ -32,6 +32,16 @@ const Customer = sequelize.define(
       type: DataTypes.STRING(20),
       allowNull: false,
     },
+    company_id: {
+      type: Sequelize.BIGINT.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: 'companies',
+        key: 'id',
+      },
+      onUpdate: 'CASCADE',
+      onDelete: 'CASCADE',
+    },
 
     alternate_phone: {
       type: DataTypes.STRING(20),
