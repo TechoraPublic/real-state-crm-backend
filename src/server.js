@@ -1,6 +1,7 @@
 import app from "./app.js";
 import sequelize from "./config/database.js";
 import env from "./config/env.js";
+import "./databases/associations.js";
 
 const sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));

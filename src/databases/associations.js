@@ -12,7 +12,7 @@ import {
   LeadActivity,
     Permission,
   RolePermission,
-} from "./model.js";
+} from "./models.js";
 
 /*
 |--------------------------------------------------------------------------

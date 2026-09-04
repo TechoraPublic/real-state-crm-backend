@@ -16,9 +16,21 @@ const Role = sequelize.define(
       unique: true,
     },
 
+    key: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+      unique: true,
+    },
+
     description: {
       type: DataTypes.STRING(255),
       allowNull: true,
+    },
+
+    status: {
+      type: DataTypes.ENUM("active", "inactive"),
+      allowNull: false,
+      defaultValue: "active",
     },
   },
   {
