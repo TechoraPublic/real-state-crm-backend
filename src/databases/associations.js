@@ -104,6 +104,16 @@ Lead.belongsTo(Company, {
 });
 
 
+Company.hasMany(LeadSource, {
+  foreignKey: "company_id",
+  as: "leadSources",
+});
+
+LeadSource.belongsTo(Company, {
+  foreignKey: "company_id",
+  as: "company",
+});
+
 /*
 |--------------------------------------------------------------------------
 | COMPANY ↔ DEAL

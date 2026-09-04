@@ -3,7 +3,9 @@ import env from "../config/env.js";
 
 const authMiddleware = (req, res, next) => {
   try {
-    // 1. Get Authorization header
+    // --------------------------------------------------
+    // 1. Get Authorization Header
+    // --------------------------------------------------
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
@@ -13,16 +15,20 @@ const authMiddleware = (req, res, next) => {
       });
     }
 
-    // 2. Check Bearer format
+    // --------------------------------------------------
+    // 2. Validate Bearer Format
+    // --------------------------------------------------
     if (!authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
-        message: "Invalid authorization format.",
+        message: "Invalid authorization format. Use Bearer token.",
       });
     }
 
-    // 3. Extract token
-    const token = authHeader.split(" ")[1];
+    // --------------------------------------------------
+    // 3. Extract Token
+    // --------------------------------------------------
+    const token = authHeader.substring(7).trim();
 
     if (!token) {
       return res.status(401).json({
@@ -31,33 +37,82 @@ const authMiddleware = (req, res, next) => {
       });
     }
 
+    // --------------------------------------------------
     // 4. Verify JWT
-    const decoded = jwt.verify(token, env.jwt.secret);
+    // --------------------------------------------------
+    const decoded = jwt.verify(
+      token,
+      env.jwt.secret
+    );
 
-    // 5. Validate JWT payload
-    if (!decoded.userId || !decoded.roleId) {
+    // --------------------------------------------------
+    // 5. Validate JWT Payload
+    //
+    // JWT must contain:
+    // userId
+    // roleId
+    // companyId
+    // --------------------------------------------------
+
+    if (
+      decoded.userId === undefined ||
+      decoded.userId === null
+    ) {
       return res.status(401).json({
         success: false,
-        message: "Invalid authentication token.",
+        message: "Invalid authentication token. User ID is missing.",
       });
     }
 
-    // 6. Attach authenticated user information
+    if (
+      decoded.roleId === undefined ||
+      decoded.roleId === null
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid authentication token. Role ID is missing.",
+      });
+    }
+
+    if (
+      decoded.companyId === undefined ||
+      decoded.companyId === null
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid authentication token. Company ID is missing.",
+      });
+    }
+
+    // --------------------------------------------------
+    // 6. Attach Authenticated User
+    // --------------------------------------------------
     req.user = {
-      userId: decoded.userId,
-      roleId: decoded.roleId,
+      userId: Number(decoded.userId),
+      roleId: Number(decoded.roleId),
+      companyId: Number(decoded.companyId),
     };
 
-    // 7. Continue request
+    // --------------------------------------------------
+    // 7. Continue Request
+    // --------------------------------------------------
     next();
+
   } catch (error) {
+
+    // --------------------------------------------------
+    // Token Expired
+    // --------------------------------------------------
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({
         success: false,
-        message: "Authentication token has expired.",
+        message: "Authentication token has expired. Please login again.",
       });
     }
 
+    // --------------------------------------------------
+    // Invalid JWT
+    // --------------------------------------------------
     if (error.name === "JsonWebTokenError") {
       return res.status(401).json({
         success: false,
@@ -65,10 +120,20 @@ const authMiddleware = (req, res, next) => {
       });
     }
 
-    return res.status(401).json({
-      success: false,
-      message: "Authentication failed.",
-    });
+    // --------------------------------------------------
+    // JWT Not Active Yet
+    // --------------------------------------------------
+    if (error.name === "NotBeforeError") {
+      return res.status(401).json({
+        success: false,
+        message: "Authentication token is not active yet.",
+      });
+    }
+
+    // --------------------------------------------------
+    // Other Errors
+    // --------------------------------------------------
+    next(error);
   }
 };
 

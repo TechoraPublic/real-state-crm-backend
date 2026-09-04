@@ -7,39 +7,83 @@ class AuthService {
    * LOGIN USER
    */
   async login({ email, password }) {
+    // --------------------------------------------------
     // 1. Find user with role + permissions
+    // --------------------------------------------------
     const user = await authRepository.findUserByEmail(email);
 
     if (!user) {
       throw new Error("Invalid email or password.");
     }
 
+    // --------------------------------------------------
     // 2. Check user status
+    // --------------------------------------------------
     if (user.status !== "active") {
-      throw new Error("Your account is inactive. Please contact administrator.");
+      throw new Error(
+        "Your account is inactive. Please contact administrator."
+      );
     }
 
-    // 3. Compare password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // --------------------------------------------------
+    // 3. Check company
+    // --------------------------------------------------
+    if (!user.company_id) {
+      throw new Error(
+        "User is not associated with any company."
+      );
+    }
+
+    // --------------------------------------------------
+    // 4. Check role
+    // --------------------------------------------------
+    if (!user.role_id) {
+      throw new Error(
+        "User is not associated with any role."
+      );
+    }
+
+    // --------------------------------------------------
+    // 5. Compare password
+    // --------------------------------------------------
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.password
+    );
 
     if (!isPasswordValid) {
       throw new Error("Invalid email or password.");
     }
 
-    // 4. Update last login
+    // --------------------------------------------------
+    // 6. Update last login
+    // --------------------------------------------------
     await authRepository.updateLastLogin(user.id);
 
-    // 5. Generate JWT
-    // JWT contains ONLY userId and roleId
+    // --------------------------------------------------
+    // 7. Generate JWT
+    //
+    // JWT contains:
+    // userId
+    // roleId
+    // companyId
+    // --------------------------------------------------
+    console.log("user-company_id",user.company_id)
     const token = generateToken({
       userId: user.id,
       roleId: user.role_id,
+      companyId: user.company_id,
     });
 
-    // 6. Extract permissions
+    // --------------------------------------------------
+    // 8. Extract permissions
+    // --------------------------------------------------
     const permissions =
       user.role?.rolePermissions
-        ?.filter((rolePermission) => rolePermission.permission)
+        ?.filter(
+          (rolePermission) =>
+            rolePermission.permission
+        )
         ?.map((rolePermission) => ({
           id: rolePermission.permission.id,
           name: rolePermission.permission.name,
@@ -48,7 +92,9 @@ class AuthService {
           action: rolePermission.permission.action,
         })) || [];
 
-    // 7. Return safe user object
+    // --------------------------------------------------
+    // 9. Return safe user object
+    // --------------------------------------------------
     return {
       token,
 
@@ -66,10 +112,10 @@ class AuthService {
 
       role: user.role
         ? {
-            id: user.role.id,
-            name: user.role.name,
-            key: user.role.key,
-          }
+          id: user.role.id,
+          name: user.role.name,
+          key: user.role.key,
+        }
         : null,
 
       permissions,
@@ -80,19 +126,49 @@ class AuthService {
    * GET CURRENT USER
    */
   async getMe(userId) {
+    // --------------------------------------------------
+    // 1. Find user
+    // --------------------------------------------------
     const user = await authRepository.findUserById(userId);
 
     if (!user) {
       throw new Error("User not found.");
     }
 
+    // --------------------------------------------------
+    // 2. Check user status
+    // --------------------------------------------------
     if (user.status !== "active") {
       throw new Error("Your account is inactive.");
     }
 
+    // --------------------------------------------------
+    // 3. Check company
+    // --------------------------------------------------
+    if (!user.company_id) {
+      throw new Error(
+        "User is not associated with any company."
+      );
+    }
+
+    // --------------------------------------------------
+    // 4. Check role
+    // --------------------------------------------------
+    if (!user.role_id) {
+      throw new Error(
+        "User is not associated with any role."
+      );
+    }
+
+    // --------------------------------------------------
+    // 5. Extract permissions
+    // --------------------------------------------------
     const permissions =
       user.role?.rolePermissions
-        ?.filter((rolePermission) => rolePermission.permission)
+        ?.filter(
+          (rolePermission) =>
+            rolePermission.permission
+        )
         ?.map((rolePermission) => ({
           id: rolePermission.permission.id,
           name: rolePermission.permission.name,
@@ -101,6 +177,9 @@ class AuthService {
           action: rolePermission.permission.action,
         })) || [];
 
+    // --------------------------------------------------
+    // 6. Return safe user object
+    // --------------------------------------------------
     return {
       user: {
         id: user.id,
@@ -116,10 +195,10 @@ class AuthService {
 
       role: user.role
         ? {
-            id: user.role.id,
-            name: user.role.name,
-            key: user.role.key,
-          }
+          id: user.role.id,
+          name: user.role.name,
+          key: user.role.key,
+        }
         : null,
 
       permissions,

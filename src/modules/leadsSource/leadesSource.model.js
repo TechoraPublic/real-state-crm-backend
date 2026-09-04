@@ -10,16 +10,19 @@ const LeadSource = sequelize.define(
       primaryKey: true,
     },
 
+    company_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+    },
+
     name: {
       type: DataTypes.STRING(100),
       allowNull: false,
-      unique: true,
     },
 
     code: {
       type: DataTypes.STRING(50),
       allowNull: false,
-      unique: true,
     },
 
     description: {

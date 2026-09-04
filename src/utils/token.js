@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
 import env from "../config/env.js";
 
-export const generateToken = ({ userId, roleId }) => {
+export const generateToken = ({ userId, roleId, companyId }) => {
   return jwt.sign(
     {
       userId,
       roleId,
+      companyId,
     },
     env.jwt.secret,
     {

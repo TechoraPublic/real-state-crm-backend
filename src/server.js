@@ -27,12 +27,16 @@ const connectDatabase = async () => {
         `❌ Database connection failed. Attempt ${attempt}/${maxRetries}`
       );
 
+      console.error("Database error:", error.message);
+
       if (attempt === maxRetries) {
         console.error("❌ Could not connect to database.");
         throw error;
       }
 
-      console.log(`⏳ Retrying database connection in ${retryDelay / 1000}s...`);
+      console.log(
+        `⏳ Retrying database connection in ${retryDelay / 1000}s...`
+      );
 
       await sleep(retryDelay);
     }
@@ -41,25 +45,64 @@ const connectDatabase = async () => {
 
 const startServer = async () => {
   try {
-    /*
-    |--------------------------------------------------------------------------
-    | Database Connection
-    |--------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------
+    // Database Connection
+    // ---------------------------------------------------------
 
     await connectDatabase();
 
-    /*
-    |--------------------------------------------------------------------------
-    | Start Server
-    |--------------------------------------------------------------------------
-    */
+    // ---------------------------------------------------------
+    // Start Express Server
+    // ---------------------------------------------------------
 
-    app.listen(env.port, () => {
+    const server = app.listen(env.port, "0.0.0.0", () => {
       console.log(
-        `🚀 CRM API running on http://localhost:${env.port}`
+        `🚀 CRM API running on http://0.0.0.0:${env.port}`
       );
     });
+
+    // ---------------------------------------------------------
+    // Server Error Handling
+    // ---------------------------------------------------------
+
+    server.on("error", (error) => {
+      console.error("❌ Server error:", error);
+
+      if (error.code === "EADDRINUSE") {
+        console.error(
+          `❌ Port ${env.port} is already in use.`
+        );
+      }
+
+      process.exit(1);
+    });
+
+    // ---------------------------------------------------------
+    // Graceful Shutdown
+    // ---------------------------------------------------------
+
+    const shutdown = async (signal) => {
+      console.log(`\n🛑 ${signal} received. Shutting down...`);
+
+      server.close(async () => {
+        console.log("✅ HTTP server closed.");
+
+        try {
+          await sequelize.close();
+          console.log("✅ Database connection closed.");
+          process.exit(0);
+        } catch (error) {
+          console.error(
+            "❌ Error closing database connection:",
+            error
+          );
+          process.exit(1);
+        }
+      });
+    };
+
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    process.on("SIGINT", () => shutdown("SIGINT"));
   } catch (error) {
     console.error("❌ Server startup failed:", error);
 
