@@ -2,6 +2,42 @@ import app from "./app.js";
 import sequelize from "./config/database.js";
 import env from "./config/env.js";
 
+const sleep = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+};
+
+const connectDatabase = async () => {
+  const maxRetries = 30;
+  const retryDelay = 3000;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(
+        `🔄 Connecting to database... Attempt ${attempt}/${maxRetries}`
+      );
+
+      await sequelize.authenticate();
+
+      console.log("✅ Database connected successfully");
+
+      return true;
+    } catch (error) {
+      console.error(
+        `❌ Database connection failed. Attempt ${attempt}/${maxRetries}`
+      );
+
+      if (attempt === maxRetries) {
+        console.error("❌ Could not connect to database.");
+        throw error;
+      }
+
+      console.log(`⏳ Retrying database connection in ${retryDelay / 1000}s...`);
+
+      await sleep(retryDelay);
+    }
+  }
+};
+
 const startServer = async () => {
   try {
     /*
@@ -10,9 +46,7 @@ const startServer = async () => {
     |--------------------------------------------------------------------------
     */
 
-    await sequelize.authenticate();
-
-    console.log("✅ Database connected successfully");
+    await connectDatabase();
 
     /*
     |--------------------------------------------------------------------------
