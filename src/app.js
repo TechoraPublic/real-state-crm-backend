@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import CompanyRoutes from "./modules/companies/company.routes.js";
+import AuthRoutes from "./modules/auth/auth.routes.js";
 
 const app = express();
 
@@ -55,6 +56,7 @@ app.get("/health", (req, res) => {
 |--------------------------------------------------------------------------
 */
 app.use("/api/v1/companies", CompanyRoutes);
+app.use("/api/v1/auth",AuthRoutes);
 
 app.get("/api/v1", (req, res) => {
   res.status(200).json({
