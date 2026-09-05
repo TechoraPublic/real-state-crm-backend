@@ -10,6 +10,17 @@ const Customer = sequelize.define(
       primaryKey: true,
     },
 
+    company_id: {
+      type: DataTypes.BIGINT.UNSIGNED,
+      allowNull: false,
+      references: {
+        model: "companies",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "CASCADE",
+    },
+
     first_name: {
       type: DataTypes.STRING(100),
       allowNull: false,
@@ -31,17 +42,6 @@ const Customer = sequelize.define(
     phone: {
       type: DataTypes.STRING(20),
       allowNull: false,
-    },
-
-    company_id: {
-      type: DataTypes.BIGINT.UNSIGNED,
-      allowNull: false,
-      references: {
-        model: "companies",
-        key: "id",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
 
     alternate_phone: {
@@ -70,6 +70,11 @@ const Customer = sequelize.define(
       defaultValue: "India",
     },
 
+    pincode: {
+      type: DataTypes.STRING(10),
+      allowNull: true,
+    },
+
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -85,6 +90,26 @@ const Customer = sequelize.define(
     tableName: "customers",
     timestamps: true,
     underscored: true,
+
+    indexes: [
+      {
+        unique: true,
+        fields: ["company_id", "phone"],
+        name: "customers_company_phone_unique",
+      },
+      {
+        fields: ["company_id"],
+        name: "customers_company_id",
+      },
+      {
+        fields: ["email"],
+        name: "customers_email",
+      },
+      {
+        fields: ["status"],
+        name: "customers_status",
+      },
+    ],
   }
 );
 

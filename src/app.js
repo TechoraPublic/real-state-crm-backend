@@ -8,6 +8,7 @@ import LeadSourceRoutes from "./modules/leadsSource/leadsSource.routes.js";
 import LeadRoutes from "./modules/leads/lead.routes.js";
 import LeadActivityRoutes from "./modules/leadActivities/leadActivities.routes.js";
 import FollowUpRoutes from "./modules/followUps/followUps.routes.js";
+import CustomerRoutes from "./modules/customers/coustmer.routes.js";
 
 const app = express();
 
@@ -67,6 +68,7 @@ app.use("/api/v1/lead-sources", LeadSourceRoutes);
 app.use("/api/v1/leads", LeadRoutes);
 app.use("/api/v1/lead-activities", LeadActivityRoutes);
 app.use("/api/v1/followups", FollowUpRoutes);
+app.use("/api/v1/customers", CustomerRoutes);
 
 app.get("/api/v1", (req, res) => {
   res.status(200).json({
