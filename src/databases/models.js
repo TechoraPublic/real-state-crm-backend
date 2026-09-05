@@ -8,7 +8,7 @@ import FollowUp from "../modules/followUps/followUps.model.js";
 import Role from "../modules/roles/roles.model.js";
 import SiteVisit from "../modules/siteVisits/siteVisit.model.js";
 import LeadSource from "../modules/leadsSource/leadesSource.model.js";
-import LeadActivity from "../modules/leads/leadActivity.model.js";
+import LeadActivity from "../modules/leadActivities/leadActivity.model.js";
 import Permission from "../modules/permissions/permission.model.js";
 
 import RolePermission from "../modules/roles/rolePermission.model.js";

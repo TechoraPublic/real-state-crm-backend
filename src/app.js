@@ -6,6 +6,7 @@ import AuthRoutes from "./modules/auth/auth.routes.js";
 import UserRoutes from "./modules/users/user.routes.js";
 import LeadSourceRoutes from "./modules/leadsSource/leadsSource.routes.js";
 import LeadRoutes from "./modules/leads/lead.routes.js";
+import LeadActivityRoutes from "./modules/leadActivities/leadActivities.routes.js";
 
 const app = express();
 
@@ -63,6 +64,7 @@ app.use("/api/v1/auth",AuthRoutes);
 app.use("/api/v1/users", UserRoutes);
 app.use("/api/v1/lead-sources", LeadSourceRoutes);
 app.use("/api/v1/leads", LeadRoutes);
+app.use("/api/v1/lead-activities", LeadActivityRoutes);
 
 app.get("/api/v1", (req, res) => {
   res.status(200).json({

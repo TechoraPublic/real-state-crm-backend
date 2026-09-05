@@ -59,8 +59,31 @@ const LeadActivity = sequelize.define(
   },
   {
     tableName: "lead_activities",
+
+    // Activity is historical data.
+    // We don't need updated_at.
     timestamps: false,
+
     underscored: true,
+
+    indexes: [
+      {
+        name: "lead_activities_lead_id",
+        fields: ["lead_id"],
+      },
+      {
+        name: "lead_activities_user_id",
+        fields: ["user_id"],
+      },
+      {
+        name: "lead_activities_type",
+        fields: ["type"],
+      },
+      {
+        name: "lead_activities_created_at",
+        fields: ["created_at"],
+      },
+    ],
   }
 );
 
