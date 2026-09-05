@@ -10,7 +10,7 @@ import {
   SiteVisit,
   LeadSource,
   LeadActivity,
-    Permission,
+  Permission,
   RolePermission,
 } from "./models.js";
 
@@ -342,15 +342,9 @@ SiteVisit.belongsTo(Property, {
 |--------------------------------------------------------------------------
 */
 
-User.hasMany(SiteVisit, {
-  foreignKey: "assigned_to",
-  as: "assignedSiteVisits",
-});
+User.hasMany(SiteVisit, { foreignKey: "assigned_to", as: "assignedSiteVisits", }); 
 
-SiteVisit.belongsTo(User, {
-  foreignKey: "assigned_to",
-  as: "assignedUser",
-});
+SiteVisit.belongsTo(User, { foreignKey: "assigned_to", as: "assignedUser", });
 
 
 /*
@@ -359,15 +353,9 @@ SiteVisit.belongsTo(User, {
 |--------------------------------------------------------------------------
 */
 
-User.hasMany(SiteVisit, {
-  foreignKey: "created_by",
-  as: "createdSiteVisits",
-});
+User.hasMany(SiteVisit, { foreignKey: "created_by", as: "createdSiteVisits", }); 
 
-SiteVisit.belongsTo(User, {
-  foreignKey: "created_by",
-  as: "siteVisitsCreated",
-});
+SiteVisit.belongsTo(User, { foreignKey: "created_by", as: "createdBy", });
 
 
 /*
