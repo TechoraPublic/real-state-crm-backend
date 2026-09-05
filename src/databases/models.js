@@ -13,6 +13,8 @@ import Permission from "../modules/permissions/permission.model.js";
 
 import RolePermission from "../modules/roles/rolePermission.model.js";
 
+import Integration from "../modules/integrations/integration.model.js";
+
 export {
   User,
   Company,
@@ -27,4 +29,5 @@ export {
     LeadActivity,
     Permission,
     RolePermission,
+    Integration,
 };
