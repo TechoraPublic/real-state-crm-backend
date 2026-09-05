@@ -1,4 +1,4 @@
-import * as propertyRepository from "./properties.repository.js";
+import * as propertyRepository from "./properties.repositories.js";
 
 /*
 |--------------------------------------------------------------------------

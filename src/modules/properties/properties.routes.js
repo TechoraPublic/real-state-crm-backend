@@ -7,17 +7,17 @@ import { validate } from "../../middlewares/validation.middleware.js";
 import propertyValidation from "./properties.validation.js";
 
 import {
-  createProperty,
-  getAllProperties,
-  getPropertyById,
-  updateProperty,
-  changePropertyStatus,
-  deleteProperty,
-  getPropertiesByType,
-  getPropertiesByCity,
-  getPropertyCountsByStatus,
-  getPropertyCountsByType,
-  getPropertyCountsByListingType,
+    createProperty,
+    getAllProperties,
+    getPropertyById,
+    updateProperty,
+    changePropertyStatus,
+    deleteProperty,
+    getPropertiesByType,
+    getPropertiesByCity,
+    getPropertyCountsByStatus,
+    getPropertyCountsByType,
+    getPropertyCountsByListingType,
 } from "./properties.controller.js";
 
 const router = express.Router();
@@ -31,18 +31,18 @@ const router = express.Router();
 */
 
 router.post(
-  "/create-property",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN",
-    "SALES_MANAGER"
-  ),
-  validate(
-    propertyValidation.createProperty.body,
-    "body"
-  ),
-  createProperty
+    "/create-property",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SALES_MANAGER"
+    ),
+    validate(
+        propertyValidation.createProperty.body,
+        "body"
+    ),
+    createProperty
 );
 
 /*
@@ -54,18 +54,18 @@ router.post(
 */
 
 router.get(
-  "/get-all-properties",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN",
-    "SALES_MANAGER"
-  ),
-  validate(
-    propertyValidation.getAllProperties.query,
-    "query"
-  ),
-  getAllProperties
+    "/get-all-properties",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SALES_MANAGER"
+    ),
+    validate(
+        propertyValidation.getAllProperties.query,
+        "query"
+    ),
+    getAllProperties
 );
 
 /*
@@ -77,14 +77,14 @@ router.get(
 */
 
 router.get(
-  "/get-properties-counts/status",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN",
-    "SALES_MANAGER"
-  ),
-  getPropertyCountsByStatus
+    "/get-properties-counts/status",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SALES_MANAGER"
+    ),
+    getPropertyCountsByStatus
 );
 
 /*
@@ -96,14 +96,14 @@ router.get(
 */
 
 router.get(
-  "/get-properties-counts/type",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN",
-    "SALES_MANAGER"
-  ),
-  getPropertyCountsByType
+    "/get-properties-counts/type",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SALES_MANAGER"
+    ),
+    getPropertyCountsByType
 );
 
 /*
@@ -115,14 +115,14 @@ router.get(
 */
 
 router.get(
-  "/get-properties-counts/listing-type",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN",
-    "SALES_MANAGER"
-  ),
-  getPropertyCountsByListingType
+    "/get-properties-counts/listing-type",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SALES_MANAGER"
+    ),
+    getPropertyCountsByListingType
 );
 
 /*
@@ -134,14 +134,18 @@ router.get(
 */
 
 router.get(
-  "/get-properties/type/:propertyType",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN",
-    "SALES_MANAGER"
-  ),
-  getPropertiesByType
+    "/get-properties/type",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SALES_MANAGER"
+    ),
+    validate(
+        propertyValidation.getPropertiesByType.query,
+        "query"
+    ),
+    getPropertiesByType
 );
 
 /*
@@ -179,18 +183,18 @@ router.get(
 */
 
 router.get(
-  "/get-property/:id",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN",
-    "SALES_MANAGER"
-  ),
-  validate(
-    propertyValidation.getPropertyById.params,
-    "params"
-  ),
-  getPropertyById
+    "/get-property/:id",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SALES_MANAGER"
+    ),
+    validate(
+        propertyValidation.getPropertyById.params,
+        "params"
+    ),
+    getPropertyById
 );
 
 /*
@@ -202,22 +206,22 @@ router.get(
 */
 
 router.put(
-  "/update-property/:id",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN",
-    "SALES_MANAGER"
-  ),
-  validate(
-    propertyValidation.updateProperty.params,
-    "params"
-  ),
-  validate(
-    propertyValidation.updateProperty.body,
-    "body"
-  ),
-  updateProperty
+    "/update-property/:id",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN",
+        "SALES_MANAGER"
+    ),
+    validate(
+        propertyValidation.updateProperty.params,
+        "params"
+    ),
+    validate(
+        propertyValidation.updateProperty.body,
+        "body"
+    ),
+    updateProperty
 );
 
 /*
@@ -229,21 +233,21 @@ router.put(
 */
 
 router.patch(
-  "/get-property-status/:id/status",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN"
-  ),
-  validate(
-    propertyValidation.changePropertyStatus.params,
-    "params"
-  ),
-  validate(
-    propertyValidation.changePropertyStatus.body,
-    "body"
-  ),
-  changePropertyStatus
+    "/get-property-status/:id/status",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN"
+    ),
+    validate(
+        propertyValidation.changePropertyStatus.params,
+        "params"
+    ),
+    validate(
+        propertyValidation.changePropertyStatus.body,
+        "body"
+    ),
+    changePropertyStatus
 );
 
 /*
@@ -255,17 +259,17 @@ router.patch(
 */
 
 router.delete(
-  "/delete-property/:id",
-  authMiddleware,
-  roleMiddleware(
-    "SUPER_ADMIN",
-    "ADMIN"
-  ),
-  validate(
-    propertyValidation.deleteProperty.params,
-    "params"
-  ),
-  deleteProperty
+    "/delete-property/:id",
+    authMiddleware,
+    roleMiddleware(
+        "SUPER_ADMIN",
+        "ADMIN"
+    ),
+    validate(
+        propertyValidation.deleteProperty.params,
+        "params"
+    ),
+    deleteProperty
 );
 
 export default router;

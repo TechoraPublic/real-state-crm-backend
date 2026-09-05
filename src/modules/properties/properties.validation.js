@@ -556,6 +556,9 @@ const changePropertyStatusBody = Joi.object({
 |--------------------------------------------------------------------------
 */
 
+
+
+
 const getAllPropertiesQuery = Joi.object({
   page: Joi.number()
     .integer()
@@ -754,28 +757,62 @@ const getAllPropertiesQuery = Joi.object({
     return value;
   });
 
+  
 /*
 |--------------------------------------------------------------------------
 | GET PROPERTIES BY TYPE
 |--------------------------------------------------------------------------
 */
-
 const getPropertiesByTypeQuery = Joi.object({
+  propertyType: Joi.string()
+    .valid(...PROPERTY_TYPES)
+    .required()
+    .messages({
+      "string.base":
+        "Property type must be a string.",
+      "string.empty":
+        "Property type is required.",
+      "any.only":
+        `Property type must be one of: ${PROPERTY_TYPES.join(", ")}.`,
+      "any.required":
+        "Property type is required.",
+    }),
+
   page: Joi.number()
     .integer()
     .min(1)
-    .default(1),
+    .default(1)
+    .messages({
+      "number.base":
+        "Page must be a number.",
+      "number.integer":
+        "Page must be an integer.",
+      "number.min":
+        "Page must be at least 1.",
+    }),
 
   limit: Joi.number()
     .integer()
     .min(1)
     .max(100)
-    .default(20),
+    .default(20)
+    .messages({
+      "number.base":
+        "Limit must be a number.",
+      "number.integer":
+        "Limit must be an integer.",
+      "number.min":
+        "Limit must be at least 1.",
+      "number.max":
+        "Limit cannot exceed 100.",
+    }),
 
   status: Joi.string()
     .valid(...PROPERTY_STATUSES)
     .optional()
     .messages({
+      "string.base":
+        "Property status must be a string.",
       "any.only":
         `Property status must be one of: ${PROPERTY_STATUSES.join(", ")}.`,
     }),
@@ -783,7 +820,11 @@ const getPropertiesByTypeQuery = Joi.object({
   sortOrder: Joi.string()
     .valid("ASC", "DESC")
     .insensitive()
-    .default("DESC"),
+    .default("DESC")
+    .messages({
+      "any.only":
+        "Sort order must be ASC or DESC.",
+    }),
 });
 
 /*
@@ -843,6 +884,8 @@ const getPropertiesByCityQuery = Joi.object({
 |--------------------------------------------------------------------------
 */
 
+
+
 export default {
   createProperty: {
     body: createPropertyBody,
@@ -878,3 +921,18 @@ export default {
     query: getPropertiesByCityQuery,
   },
 };
+
+/*
+|--------------------------------------------------------------------------
+| GET PROPERTIES BY TYPE
+|--------------------------------------------------------------------------
+*/
+
+
+
+/*
+|--------------------------------------------------------------------------
+| EXPORT VALIDATION OBJECT
+|--------------------------------------------------------------------------
+*/
+
