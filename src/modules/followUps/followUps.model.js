@@ -52,8 +52,7 @@ const FollowUp = sequelize.define(
       type: DataTypes.ENUM(
         "pending",
         "completed",
-        "cancelled",
-        "overdue"
+        "cancelled"
       ),
       allowNull: false,
       defaultValue: "pending",
