@@ -189,23 +189,18 @@ export const updateSiteVisit = async (
 |--------------------------------------------------------------------------
 */
 
+
 export const changeSiteVisitStatus = async (
   req,
   res,
   next
 ) => {
   try {
-    const companyId =
-      req.user.companyId;
+    const companyId = req.user.companyId;
+    const userId = req.user.userId;
 
-    const userId =
-      req.user.userId;
-
-    const params =
-      req.validatedParams || req.params;
-
-    const body =
-      req.body;
+    const params = req.validatedParams || req.params;
+    const body = req.body;
 
     const siteVisit =
       await siteVisitService.changeSiteVisitStatus(
@@ -218,14 +213,15 @@ export const changeSiteVisitStatus = async (
 
     return res.status(200).json({
       success: true,
-      message:
-        "Site visit status updated successfully.",
+      message: "Site visit status updated successfully.",
       data: siteVisit,
     });
   } catch (error) {
     next(error);
   }
 };
+
+
 
 /*
 |--------------------------------------------------------------------------

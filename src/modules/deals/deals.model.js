@@ -22,7 +22,7 @@ const Deal = sequelize.define(
 
     customer_id: {
       type: DataTypes.BIGINT.UNSIGNED,
-      allowNull: false,
+      allowNull: true,
     },
 
     property_id: {

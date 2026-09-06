@@ -11,6 +11,7 @@ import FollowUpRoutes from "./modules/followUps/followUps.routes.js";
 import CustomerRoutes from "./modules/customers/coustmer.routes.js";
 import PropertyRoutes from "./modules/properties/properties.routes.js";
 import SiteVisitRoutes from "./modules/siteVisits/siteVisit.routes.js";
+import DealRoutes from "./modules/deals/deals.routes.js";
 
 const app = express();
 
@@ -73,6 +74,7 @@ app.use("/api/v1/followups", FollowUpRoutes);
 app.use("/api/v1/customers", CustomerRoutes);
 app.use("/api/v1/properties", PropertyRoutes);
 app.use("/api/v1/siteVisit", SiteVisitRoutes);
+app.use("/api/v1/deals", DealRoutes);
 app.get("/api/v1", (req, res) => {
   res.status(200).json({
     success: true,

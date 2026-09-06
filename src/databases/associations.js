@@ -364,6 +364,12 @@ SiteVisit.belongsTo(User, { foreignKey: "created_by", as: "createdBy", });
 |--------------------------------------------------------------------------
 */
 
+/*
+|--------------------------------------------------------------------------
+| LEAD ↔ DEAL
+|--------------------------------------------------------------------------
+*/
+
 Lead.hasMany(Deal, {
   foreignKey: "lead_id",
   as: "deals",
@@ -439,7 +445,7 @@ User.hasMany(Deal, {
 
 Deal.belongsTo(User, {
   foreignKey: "created_by",
-  as: "dealsCreated",
+  as: "createdBy",
 });
 
 
@@ -456,10 +462,8 @@ User.hasMany(Deal, {
 
 Deal.belongsTo(User, {
   foreignKey: "updated_by",
-  as: "dealsUpdated",
+  as: "updatedBy",
 });
-
-
 /*
 |--------------------------------------------------------------------------
 | USER ↔ PROPERTY (CREATED BY)

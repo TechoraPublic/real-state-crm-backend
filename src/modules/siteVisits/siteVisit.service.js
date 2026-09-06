@@ -780,6 +780,7 @@ export const updateSiteVisit = async (
 |--------------------------------------------------------------------------
 */
 
+
 export const changeSiteVisitStatus = async (
   siteVisitId,
   status,
@@ -839,7 +840,8 @@ export const changeSiteVisitStatus = async (
 
   if (currentStatus === status) {
     throw createError(
-      `Site visit is already ${status}.`
+      `Site visit is already ${status}.`,
+      400
     );
   }
 
@@ -855,7 +857,8 @@ export const changeSiteVisitStatus = async (
     )
   ) {
     throw createError(
-      `Site visit cannot be changed because it is already ${currentStatus}.`
+      `Site visit cannot be changed because it is already ${currentStatus}.`,
+      400
     );
   }
 
@@ -880,46 +883,54 @@ export const changeSiteVisitStatus = async (
   };
 
   const allowedNextStatuses =
-    allowedTransitions[
-      currentStatus
-    ] || [];
+    allowedTransitions[currentStatus] || [];
 
   if (
-    !allowedNextStatuses.includes(
-      status
-    )
+    !allowedNextStatuses.includes(status)
   ) {
     throw createError(
-      `Cannot change site visit status from ${currentStatus} to ${status}.`
+      `Cannot change site visit status from ${currentStatus} to ${status}.`,
+      400
     );
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Outcome Validation
+  | Normalize Outcome
   |--------------------------------------------------------------------------
   */
 
-  let normalizedOutcome;
+  let normalizedOutcome = undefined;
 
-  if (outcome !== undefined) {
+  if (outcome !== undefined && outcome !== null) {
     normalizedOutcome =
       normalizeString(outcome);
   }
 
-  if (
-    status === "completed" &&
-    !normalizedOutcome &&
-    !existingVisit.outcome
-  ) {
-    throw createError(
-      "Outcome is required when completing a site visit."
-    );
+  /*
+  |--------------------------------------------------------------------------
+  | Completed Outcome Validation
+  |--------------------------------------------------------------------------
+  */
+
+  if (status === "completed") {
+    const finalOutcome =
+      normalizedOutcome ||
+      normalizeString(existingVisit.outcome);
+
+    if (!finalOutcome) {
+      throw createError(
+        "Outcome is required when completing a site visit.",
+        400
+      );
+    }
+
+    normalizedOutcome = finalOutcome;
   }
 
   /*
   |--------------------------------------------------------------------------
-  | Status Update
+  | Update Status
   |--------------------------------------------------------------------------
   */
 
@@ -930,6 +941,8 @@ export const changeSiteVisitStatus = async (
     normalizedOutcome
   );
 };
+
+
 
 /*
 |--------------------------------------------------------------------------
