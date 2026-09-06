@@ -13,6 +13,7 @@ import PropertyRoutes from "./modules/properties/properties.routes.js";
 import SiteVisitRoutes from "./modules/siteVisits/siteVisit.routes.js";
 import DealRoutes from "./modules/deals/deals.routes.js";
 import DashboardRoutes from "./modules/dashboard/dashboard.routes.js";
+import IntegrationRoutes from "./modules/integrations/integration.routes.js";
 
 const app = express();
 
@@ -77,6 +78,7 @@ app.use("/api/v1/properties", PropertyRoutes);
 app.use("/api/v1/siteVisit", SiteVisitRoutes);
 app.use("/api/v1/deals", DealRoutes);
 app.use("/api/v1/dashboard", DashboardRoutes);
+app.use("/api/v1/integrations", IntegrationRoutes);
 app.get("/api/v1", (req, res) => {
   res.status(200).json({
     success: true,

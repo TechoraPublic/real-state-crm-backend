@@ -12,6 +12,7 @@ import {
   LeadActivity,
   Permission,
   RolePermission,
+  Integration,
 } from "./models.js";
 
 /*
@@ -30,6 +31,22 @@ User.belongsTo(Company, {
   as: "company",
 });
 
+
+/*
+|--------------------------------------------------------------------------
+| COMPANY ↔ INTEGRATION
+|--------------------------------------------------------------------------
+*/
+
+Company.hasMany(Integration, {
+  foreignKey: "company_id",
+  as: "integrations",
+});
+
+Integration.belongsTo(Company, {
+  foreignKey: "company_id",
+  as: "company",
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -141,7 +158,21 @@ Deal.belongsTo(Company, {
 | So no Integration association is added here.
 |
 */
+/*
+|--------------------------------------------------------------------------
+| LEAD SOURCE ↔ INTEGRATION
+|--------------------------------------------------------------------------
+*/
 
+LeadSource.hasMany(Integration, {
+  foreignKey: "lead_source_id",
+  as: "integrations",
+});
+
+Integration.belongsTo(LeadSource, {
+  foreignKey: "lead_source_id",
+  as: "leadSource",
+});
 
 /*
 |--------------------------------------------------------------------------
