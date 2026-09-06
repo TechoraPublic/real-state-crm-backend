@@ -289,3 +289,51 @@ export const deleteIntegration = async (
     next(error);
   }
 };
+
+
+/*
+|--------------------------------------------------------------------------
+| TEST INTEGRATION
+|--------------------------------------------------------------------------
+*/
+
+export const testIntegration = async (req, res, next) => {
+  try {
+    const { id } = req.validatedParams;
+
+    const data =
+      await integrationService.testIntegration({
+        integrationId: id,
+        companyId: req.user.companyId,
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Integration test successful.",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const syncIntegration = async (req, res, next) => {
+  try {
+    const { id } = req.validatedParams;
+
+    const data =
+      await integrationService.syncIntegration({
+        integrationId: id,
+        companyId: req.user.companyId,
+      });
+
+    return res.status(200).json({
+      success: true,
+      message: "Integration sync completed.",
+      data,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

@@ -218,6 +218,14 @@ const integrationValidation = {
   deleteIntegration: {
     params: integrationIdParams,
   },
+
+   testIntegration: {
+    params: integrationIdParams,
+  },
+
+  syncIntegration: {
+  params: integrationIdParams,
+},
 };
 
 export default integrationValidation;

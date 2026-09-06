@@ -15,6 +15,8 @@ import {
   changeIntegrationStatus,
   updateSyncStatus,
   deleteIntegration,
+  testIntegration,
+  syncIntegration
 } from "./integration.controller.js";
 
 const router = express.Router();
@@ -43,7 +45,7 @@ router.post(
   authMiddleware,
   integrationAdminAccess,
   validate(
-    integrationValidation.createIntegration.body || 
+    integrationValidation.createIntegration.body ||
     integrationValidation.createIntegration,
     "body"
   ),
@@ -177,6 +179,28 @@ router.delete(
     "params"
   ),
   deleteIntegration
+);
+
+router.post(
+  "/test/:id",
+  authMiddleware,
+  roleMiddleware("SUPER_ADMIN", "ADMIN"),
+  validate(
+    integrationValidation.testIntegration.params,
+    "params"
+  ),
+  testIntegration
+);
+
+router.post(
+  "/sync/:id",
+  authMiddleware,
+  roleMiddleware("SUPER_ADMIN", "ADMIN"),
+  validate(
+    integrationValidation.syncIntegration.params,
+    "params"
+  ),
+  syncIntegration
 );
 
 export default router;

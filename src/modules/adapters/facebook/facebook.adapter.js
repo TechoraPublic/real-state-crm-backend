@@ -55,44 +55,144 @@ class FacebookAdapter extends BaseAdapter {
     }
   }
 
+  // async fetchLeads() {
+  //   if (!this.accessToken) {
+  //     throw new Error("Facebook access token is required.");
+  //   }
+
+  //   if (!this.pageId) {
+  //     throw new Error("Facebook page ID is required.");
+  //   }
+
+  //   try {
+  //     const response = await axios.get(
+  //       `${this.baseUrl}/${this.pageId}/leadgen_forms`,
+  //       {
+  //         params: {
+  //           access_token: this.accessToken,
+  //         },
+  //         timeout: 10000,
+  //       }
+  //     );
+
+  //     return {
+  //       success: true,
+  //       platform: "facebook",
+  //       data: response.data?.data || [],
+  //       paging: response.data?.paging || null,
+  //     };
+  //   } catch (error) {
+  //     const message =
+  //       error.response?.data?.error?.message ||
+  //       error.message ||
+  //       "Failed to fetch Facebook data.";
+
+  //     const fetchError = new Error(message);
+  //     fetchError.statusCode = 400;
+
+  //     throw fetchError;
+  //   }
+  // }
+
   async fetchLeads() {
-    if (!this.accessToken) {
-      throw new Error("Facebook access token is required.");
-    }
+  /*
+  |--------------------------------------------------------------------------
+  | TEST MODE
+  |--------------------------------------------------------------------------
+  */
 
-    if (!this.pageId) {
-      throw new Error("Facebook page ID is required.");
-    }
+  if (this.config.test_mode === true) {
+    return {
+      success: true,
+      platform: "facebook",
+      test_mode: true,
 
-    try {
-      const response = await axios.get(
+      data: [
+        {
+          id: "facebook_test_lead_001",
+
+          created_time:
+            new Date().toISOString(),
+
+          field_data: [
+            {
+              name: "full_name",
+              values: ["Rahul Sharma"],
+            },
+            {
+              name: "email",
+              values: ["rahul@example.com"],
+            },
+            {
+              name: "phone_number",
+              values: ["9876543210"],
+            },
+            {
+              name: "city",
+              values: ["Delhi"],
+            },
+          ],
+        },
+      ],
+
+      paging: null,
+    };
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | REAL FACEBOOK API
+  |--------------------------------------------------------------------------
+  */
+
+  if (!this.accessToken) {
+    throw new Error(
+      "Facebook access token is required."
+    );
+  }
+
+  if (!this.pageId) {
+    throw new Error(
+      "Facebook page ID is required."
+    );
+  }
+
+  try {
+    const response =
+      await axios.get(
         `${this.baseUrl}/${this.pageId}/leadgen_forms`,
         {
           params: {
-            access_token: this.accessToken,
+            access_token:
+              this.accessToken,
           },
           timeout: 10000,
         }
       );
 
-      return {
-        success: true,
-        platform: "facebook",
-        data: response.data?.data || [],
-        paging: response.data?.paging || null,
-      };
-    } catch (error) {
-      const message =
-        error.response?.data?.error?.message ||
-        error.message ||
-        "Failed to fetch Facebook data.";
+    return {
+      success: true,
+      platform: "facebook",
+      test_mode: false,
+      data:
+        response.data?.data || [],
+      paging:
+        response.data?.paging || null,
+    };
+  } catch (error) {
+    const message =
+      error.response?.data?.error?.message ||
+      error.message ||
+      "Failed to fetch Facebook data.";
 
-      const fetchError = new Error(message);
-      fetchError.statusCode = 400;
+    const fetchError =
+      new Error(message);
 
-      throw fetchError;
-    }
+    fetchError.statusCode = 400;
+
+    throw fetchError;
   }
+}
 }
 
 export default FacebookAdapter;

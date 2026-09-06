@@ -1,5 +1,8 @@
 import * as integrationRepository from "./integration.repository.js";
 import { LeadSource } from "../../databases/models.js";
+import { getAdapter } from "../adapters/registry/adapter.registry.js";
+import normalizeLead from "../normalizers/lead.normalizer.js";
+import * as leadService from "../leads/lead.service.js";
 
 /*
 |--------------------------------------------------------------------------
@@ -911,5 +914,400 @@ export const deleteIntegration = async ({
   return {
     integrationId: validIntegrationId,
     deleted: true,
+  };
+};
+
+/*
+|--------------------------------------------------------------------------
+| TEST INTEGRATION
+|--------------------------------------------------------------------------
+|
+| Flow:
+| Integration
+|     ↓
+| Adapter Registry
+|     ↓
+| Platform Adapter
+|     ↓
+| Raw Lead Data
+|     ↓
+| Lead Normalizer
+|
+| IMPORTANT:
+| This function DOES NOT create a Lead in database.
+|
+*/
+
+export const testIntegration = async ({
+  integrationId,
+  companyId,
+}) => {
+  const validIntegrationId =
+    validateIntegrationId(integrationId);
+
+  const validCompanyId =
+    validateCompanyId(companyId);
+
+  /*
+  |--------------------------------------------------------------------------
+  | Find integration
+  |--------------------------------------------------------------------------
+  */
+
+  const integration =
+    await integrationRepository.findIntegrationById(
+      validIntegrationId,
+      validCompanyId
+    );
+
+  if (!integration) {
+    const error = new Error(
+      "Integration not found."
+    );
+
+    error.statusCode = 404;
+    throw error;
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Integration must be active
+  |--------------------------------------------------------------------------
+  */
+
+  if (integration.status !== "active") {
+    const error = new Error(
+      "Only active integrations can be tested."
+    );
+
+    error.statusCode = 400;
+    throw error;
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | Get platform adapter
+  |--------------------------------------------------------------------------
+  */
+
+  const adapter =
+    getAdapter(
+      integration.platform,
+      integration
+    );
+
+  /*
+  |--------------------------------------------------------------------------
+  | Fetch raw leads
+  |--------------------------------------------------------------------------
+  */
+
+  const adapterResponse =
+    await adapter.fetchLeads();
+
+  const rawLeads =
+    Array.isArray(adapterResponse?.data)
+      ? adapterResponse.data
+      : [];
+
+  /*
+  |--------------------------------------------------------------------------
+  | Normalize leads
+  |--------------------------------------------------------------------------
+  */
+
+  const normalizedLeads =
+    rawLeads.map((rawLead) =>
+      normalizeLead(
+        rawLead,
+        integration
+      )
+    );
+
+  /*
+  |--------------------------------------------------------------------------
+  | Return test result
+  |--------------------------------------------------------------------------
+  */
+
+  return {
+    integration: {
+      id: integration.id,
+      name: integration.name,
+      platform: integration.platform,
+      status: integration.status,
+    },
+
+    test: {
+      success: true,
+      rawLeadCount: rawLeads.length,
+      normalizedLeadCount:
+        normalizedLeads.length,
+    },
+
+    rawLeads,
+
+    normalizedLeads,
+  };
+};
+
+
+/*
+|--------------------------------------------------------------------------
+| SYNC INTEGRATION
+|--------------------------------------------------------------------------
+|
+| Flow:
+|
+| Integration
+|     ↓
+| Adapter Registry
+|     ↓
+| Platform Adapter
+|     ↓
+| Raw Leads
+|     ↓
+| Lead Normalizer
+|     ↓
+| Lead Service
+|     ↓
+| Duplicate Check
+|     ↓
+| leads table
+|
+| IMPORTANT:
+| This function creates leads in database.
+|
+*/
+
+export const syncIntegration = async ({
+  integrationId,
+  companyId,
+}) => {
+  const validIntegrationId =
+    validateIntegrationId(integrationId);
+
+  const validCompanyId =
+    validateCompanyId(companyId);
+
+  /*
+  |--------------------------------------------------------------------------
+  | FIND INTEGRATION
+  |--------------------------------------------------------------------------
+  */
+
+  const integration =
+    await integrationRepository.findIntegrationById(
+      validIntegrationId,
+      validCompanyId
+    );
+
+  if (!integration) {
+    const error = new Error(
+      "Integration not found."
+    );
+
+    error.statusCode = 404;
+    throw error;
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | INTEGRATION MUST BE ACTIVE
+  |--------------------------------------------------------------------------
+  */
+
+  if (integration.status !== "active") {
+    const error = new Error(
+      "Only active integrations can be synchronized."
+    );
+
+    error.statusCode = 400;
+    throw error;
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | GET PLATFORM ADAPTER
+  |--------------------------------------------------------------------------
+  */
+
+  const adapter =
+    getAdapter(
+      integration.platform,
+      integration
+    );
+
+  /*
+  |--------------------------------------------------------------------------
+  | FETCH RAW LEADS
+  |--------------------------------------------------------------------------
+  */
+
+  const adapterResponse =
+    await adapter.fetchLeads();
+
+  const rawLeads =
+    Array.isArray(adapterResponse?.data)
+      ? adapterResponse.data
+      : [];
+
+  /*
+  |--------------------------------------------------------------------------
+  | SYNC RESULT
+  |--------------------------------------------------------------------------
+  */
+
+  let created = 0;
+  let duplicates = 0;
+  let failed = 0;
+
+  const createdLeads = [];
+  const duplicateLeads = [];
+  const failedLeads = [];
+
+  /*
+  |--------------------------------------------------------------------------
+  | PROCESS EACH LEAD
+  |--------------------------------------------------------------------------
+  */
+
+  for (const rawLead of rawLeads) {
+    try {
+      /*
+      |----------------------------------------------------------------------
+      | NORMALIZE
+      |----------------------------------------------------------------------
+      */
+
+      const normalizedLead =
+        normalizeLead(
+          rawLead,
+          integration
+        );
+
+      /*
+      |----------------------------------------------------------------------
+      | CREATE LEAD
+      |----------------------------------------------------------------------
+      |
+      | Existing leadService.createLead() already performs:
+      |
+      | company validation
+      | related record validation
+      | duplicate external lead check
+      | lead creation
+      |
+      */
+
+      const lead =
+        await leadService.createLead(
+          normalizedLead,
+          validCompanyId
+        );
+
+      created++;
+
+      createdLeads.push({
+        id: lead.id,
+        source_lead_id:
+          lead.source_lead_id,
+      });
+    } catch (error) {
+      /*
+      |--------------------------------------------------------------------------
+      | DUPLICATE
+      |--------------------------------------------------------------------------
+      */
+
+      if (error.statusCode === 409) {
+        duplicates++;
+
+        duplicateLeads.push({
+          source_lead_id:
+            rawLead?.id || null,
+          message: error.message,
+        });
+
+        continue;
+      }
+
+      /*
+      |--------------------------------------------------------------------------
+      | FAILED
+      |--------------------------------------------------------------------------
+      */
+
+      failed++;
+
+      failedLeads.push({
+        source_lead_id:
+          rawLead?.id || null,
+        message:
+          error.message ||
+          "Failed to create lead.",
+      });
+    }
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | UPDATE SYNC STATUS
+  |--------------------------------------------------------------------------
+  */
+
+  if (failed === 0) {
+    await integrationRepository.updateSyncStatus(
+      validIntegrationId,
+      validCompanyId,
+      {
+        lastSyncedAt: new Date(),
+        lastError: null,
+      }
+    );
+  } else {
+    const errorMessage =
+      failedLeads
+        .map(
+          (item) =>
+            `${item.source_lead_id}: ${item.message}`
+        )
+        .join(" | ");
+
+    await integrationRepository.updateSyncStatus(
+      validIntegrationId,
+      validCompanyId,
+      {
+        lastSyncedAt: new Date(),
+        lastError: errorMessage,
+      }
+    );
+  }
+
+  /*
+  |--------------------------------------------------------------------------
+  | RETURN SYNC RESULT
+  |--------------------------------------------------------------------------
+  */
+
+  return {
+    integration: {
+      id: integration.id,
+      name: integration.name,
+      platform: integration.platform,
+      status: integration.status,
+    },
+
+    sync: {
+      success: failed === 0,
+      totalFetched: rawLeads.length,
+      created,
+      duplicates,
+      failed,
+    },
+
+    createdLeads,
+    duplicateLeads,
+    failedLeads,
   };
 };
